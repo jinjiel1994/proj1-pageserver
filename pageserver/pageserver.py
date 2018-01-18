@@ -90,7 +90,7 @@ def respond(sock):
         if parts[1].endswith('.html') or parts[1].endswith('.css'):
             if '//' not in parts[1] and '..' not in parts[1] and '~' not in parts[1]:
                 try:
-                    filename = '../pages%s' % parts[1]
+                    filename = './pages%s' % parts[1]
                     PAGE = open(filename, "r").read()
                     transmit(STATUS_OK, sock)
                     transmit(PAGE, sock)
