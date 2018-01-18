@@ -6,11 +6,6 @@
   error handling and many other things to keep the illustration as simple
   as possible.
 
-  FIXME:
-  Currently this program always serves an ascii graphic of a cat.
-  Change it to serve files if they end with .html or .css, and are
-  located in ./pages  (where '.' is the directory from which this
-  program is run).
 """
 
 import config    # Configure from .ini files and command line
@@ -22,6 +17,7 @@ log = logging.getLogger(__name__)
 
 import socket    # Basic TCP/IP communication on the internet
 import _thread   # Response computation runs concurrently with main program
+import os
 
 
 def listen(portnum):
@@ -91,8 +87,21 @@ def respond(sock):
 
     parts = request.split()
     if len(parts) > 1 and parts[0] == "GET":
-        transmit(STATUS_OK, sock)
-        transmit(CAT, sock)
+        if parts[1].endswith('.html') or parts[1].endswith('.css'):
+            if '//' not in parts[1] and '..' not in parts[1] and '~' not in parts[1]:
+                try:
+                    filename = '../pages%s' % parts[1]
+                    print(filename)
+                    PAGE = open(filename, "r").read()
+                    transmit(STATUS_OK, sock)
+                    transmit(PAGE, sock)
+                except:
+                    transmit(STATUS_NOT_FOUND, sock)
+            else:
+                transmit(STATUS_FORBIDDEN, sock)
+        else:
+            transmit(STATUS_OK, sock)
+            transmit(CAT, sock)
     else:
         log.info("Unhandled request: {}".format(request))
         transmit(STATUS_NOT_IMPLEMENTED, sock)
@@ -138,6 +147,7 @@ def get_options():
 def main():
     options = get_options()
     port = options.PORT
+    docroot = options.DOCROOT
     if options.DEBUG:
         log.setLevel(logging.DEBUG)
     sock = listen(port)
