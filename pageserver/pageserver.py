@@ -91,7 +91,6 @@ def respond(sock):
             if '//' not in parts[1] and '..' not in parts[1] and '~' not in parts[1]:
                 try:
                     filename = '../pages%s' % parts[1]
-                    print(filename)
                     PAGE = open(filename, "r").read()
                     transmit(STATUS_OK, sock)
                     transmit(PAGE, sock)
@@ -100,8 +99,7 @@ def respond(sock):
             else:
                 transmit(STATUS_FORBIDDEN, sock)
         else:
-            transmit(STATUS_OK, sock)
-            transmit(CAT, sock)
+            transmit(STATUS_FORBIDDEN, sock)
     else:
         log.info("Unhandled request: {}".format(request))
         transmit(STATUS_NOT_IMPLEMENTED, sock)
